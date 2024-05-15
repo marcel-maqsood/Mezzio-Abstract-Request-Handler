@@ -31,7 +31,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
         $this->persistentPDO = $persistentPDO;
     }
 
-    protected abstract function defaultResponse(ServerRequestInterface $request, array $postData = []): HtmlResponse;
+    protected abstract function defaultResponse(ServerRequestInterface $request, array $postData = []): ResponseInterface;
 
     /**
      * save returns the userhash if the insert was successful, otherwise it returns false.
@@ -48,9 +48,9 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
      */
     abstract protected function generateTemplateData(array $postData = [], array $feedback = []): array;
     abstract protected function getLookupResult(ServerRequestInterface $request, array $postData = [], $feedBack = []):
-    HtmlResponse;
+    ResponseInterface;
     abstract protected function handleExtraConfigs(ServerRequestInterface $request, array $postData):
-    JsonResponse|HtmlResponse|bool;
+    ResponseInterface|bool;
 
     /**
      * This function generates Insert Arrays to further use for PDO by looping through $this->tableConfig and gets
@@ -210,7 +210,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
         return $conditions;
     }
 
-    protected function handlePost(ServerRequestInterface $request, string $template) : HtmlResponse|JsonResponse
+    protected function handlePost(ServerRequestInterface $request, string $template) : ResponseInterface
     {
         $postData = $this->fetchPostData($request);
 
@@ -264,7 +264,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
      * is implemented within the handler itself.
      */
     protected function handleLookup(ServerRequestInterface $request, array &$postData = [], $feedBack = [])
-    : HtmlResponse
+    : ResponseInterface
     {
         if (! isset($postData[$this->handlerConfig['searchqueue']]))
         {

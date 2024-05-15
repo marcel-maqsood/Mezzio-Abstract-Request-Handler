@@ -1,4 +1,4 @@
-# Session-Auth-Middleware
+# Mezzio-Abstract-Request-Handler
 
 
 You can install this package with the following command:

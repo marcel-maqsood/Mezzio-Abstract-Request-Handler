@@ -1,0 +1,39 @@
+{
+    "name": "marcel-maqsood/mezzio-abstract-request-handler",
+    "description": "The AbstractRequestHandler is a abstract RequestHandler that contaisn additional functions to be used in a Laminas/Mezzio application",
+    "keywords": [
+        "framework",
+        "MazeDEV",
+        "request",
+        "handler",
+        "abstract"
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/marcel-maqsood/Mezzio-Abstract-Request-Handler",
+    "authors": [
+        {
+            "name": "Technikhafen",
+            "homepage": "https://technikhafen.de"
+        },
+        {
+            "name": "Marcel Maqsood"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MazeDEV\\AbstractRequestHandler\\": "src/"
+        }
+    },
+    "extra": {
+        "laminas": {
+            "component": "MazeDEV\\AbstractRequestHandler"
+        }
+    },
+    "require": {
+        "webmozart/assert": "^1.11",
+        "psr/container": "^1.0",
+        "mezzio/mezzio-router": "^3.17",
+        "marcel-maqsood/database-connector": "^1.0",
+        "laminas/laminas-diactoros": "^3.3"
+    }
+}

@@ -56,6 +56,10 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     public function handleAll(ServerRequestInterface $request, $templateName = null) : ResponseInterface
     {
         $this->adminName = $request->getAttribute('adminName', null);
+        if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
+		{
+			$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
+		}
 
         if ($request->getMethod() === 'POST') {
             return $this->handlePost($request, $templateName);
@@ -177,6 +181,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected function generateResponseWithAttr(string $templateName, array $attributes = [])
     {
         $attributes['adminName'] = $this->adminName;
+        $attributes['csrf'] = $this->guard == null ? null : $this->guard->generateToken();
         return new HtmlResponse($this->renderHtml($templateName, $attributes));
     }
 

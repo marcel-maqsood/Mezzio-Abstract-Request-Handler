@@ -53,7 +53,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     abstract protected function handleExtraConfigs(ServerRequestInterface $request, array $postData): ResponseInterface|bool;
 
 
-    public function handle(ServerRequestInterface $request, $templateName = null) : ResponseInterface
+    public function handleAll(ServerRequestInterface $request, $templateName = null) : ResponseInterface
     {
         $this->adminName = $request->getAttribute('adminName', null);
 

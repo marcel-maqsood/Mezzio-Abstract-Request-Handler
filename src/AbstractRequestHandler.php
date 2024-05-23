@@ -22,6 +22,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected $persistentPDO;
     protected $errorMsgs;
     protected $baseTemplate;
+    protected $guard;
 
     public function __construct(TemplateRendererInterface $renderer, PersistentPDO $persistentPDO = null,
                                 array $tableConfig = [], array $handlerConfig = [])
@@ -48,10 +49,20 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
      * @return array
      */
     abstract protected function generateTemplateData(array $postData = [], array $feedback = []): array;
-    abstract protected function getLookupResult(ServerRequestInterface $request, array $postData = [], $feedBack = []):
-    ResponseInterface;
-    abstract protected function handleExtraConfigs(ServerRequestInterface $request, array $postData):
-    ResponseInterface|bool;
+    abstract protected function getLookupResult(ServerRequestInterface $request, array $postData = [], $feedBack = []): ResponseInterface;
+    abstract protected function handleExtraConfigs(ServerRequestInterface $request, array $postData): ResponseInterface|bool;
+
+
+    public function handle(ServerRequestInterface $request, $templateName) : ResponseInterface
+    {
+        $this->adminName = $request->getAttribute('adminName', null);
+
+        if ($request->getMethod() === 'POST') {
+            return $this->handlePost($request, $templateName);
+        }
+
+        return $this->defaultResponse($request);
+    }
 
     /**
      * This function generates Insert Arrays to further use for PDO by looping through $this->tableConfig and gets

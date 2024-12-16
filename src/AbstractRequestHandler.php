@@ -20,6 +20,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected $renderer;
     protected $data;
     protected $adminName = null;
+	protected $userPath = null;
     protected $persistentPDO;
     protected $errorMsgs;
     protected $baseTemplate;
@@ -57,6 +58,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     public function handleAll(ServerRequestInterface $request, $templateName = null) : ResponseInterface
     {
         $this->adminName = $request->getAttribute('adminName', null);
+		$this->userPath = $request->getAttribute('userPath', null);
         if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
 		{
 			$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
@@ -116,6 +118,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
         if($this->adminName !== null)
         {
             $attributes['adminName'] = $this->adminName;
+			$attributes['userPath'] = $this->userPath;
         }
 
         return $this->renderer->render(
@@ -182,6 +185,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected function generateResponseWithAttr(string $templateName, array $attributes = [])
     {
         $attributes['adminName'] = $this->adminName;
+		$attributes['userPath'] = $this->userPath;
         $attributes['csrf'] = $this->guard == null ? null : $this->guard->generateToken();
         return new HtmlResponse($this->renderHtml($templateName, $attributes));
     }

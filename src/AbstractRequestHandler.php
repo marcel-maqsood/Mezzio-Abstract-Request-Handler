@@ -25,6 +25,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected $errorMsgs;
     protected $baseTemplate;
     protected $guard;
+	protected $csrfToken;
 
     public function __construct(TemplateRendererInterface $renderer, PersistentPDO $persistentPDO = null,
                                 array $tableConfig = [], array $handlerConfig = [])
@@ -62,6 +63,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
         if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
 		{
 			$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
+			$this->csrfToken = $this->guard == null ? null : $this->guard->generateToken();
 		}
 
         if ($request->getMethod() === 'POST') {
@@ -186,7 +188,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     {
         $attributes['adminName'] = $this->adminName;
 		$attributes['userPath'] = $this->userPath;
-        $attributes['csrf'] = $this->guard == null ? null : $this->guard->generateToken();
+        $attributes['csrf'] = $this->csrfToken;
         return new HtmlResponse($this->renderHtml($templateName, $attributes));
     }
 

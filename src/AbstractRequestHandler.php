@@ -60,15 +60,19 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     {
         $this->adminName = $request->getAttribute('adminName', null);
 		$this->userPath = $request->getAttribute('userPath', null);
-        if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
-		{
-			$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
-			$this->csrfToken = $this->guard == null ? null : $this->guard->generateToken();
-		}
+
 
         if ($request->getMethod() === 'POST') {
             return $this->handlePost($request, $templateName);
         }
+		else
+		{
+			if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
+			{
+				$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
+				$this->csrfToken = $this->guard == null ? null : $this->guard->generateToken();
+			}
+		}
 
         return $this->defaultResponse($request);
     }

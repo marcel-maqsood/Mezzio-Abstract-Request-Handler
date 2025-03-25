@@ -123,6 +123,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     {
         if($this->adminName !== null)
         {
+            $attributes['user'] = SessionAuthMiddleware::$permissionManager::getUser();
             $attributes['adminName'] = $this->adminName;
 			$attributes['userPath'] = $this->userPath;
         }
@@ -191,7 +192,11 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
     protected function generateResponseWithAttr(string $templateName, array $attributes = [])
     {
         $attributes['adminName'] = $this->adminName;
-		$attributes['userPath'] = $this->userPath;
+        if($this->adminName != null)
+        {
+            $attributes['user'] = SessionAuthMiddleware::$permissionManager::getUser();
+        }
+        $attributes['userPath'] = $this->userPath;
         $attributes['csrf'] = $this->csrfToken;
         return new HtmlResponse($this->renderHtml($templateName, $attributes));
     }

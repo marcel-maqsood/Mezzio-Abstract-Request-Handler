@@ -10,6 +10,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use MazeDEV\SessionAuth\SessionAuthMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Mezzio\Csrf\CsrfMiddleware;
 

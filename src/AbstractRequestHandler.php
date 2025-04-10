@@ -267,15 +267,23 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		$conditions = [];
 		$hasQueue = isset($postData[$this->handlerConfig['searchqueue']]);
 
-		if(!$hasQueue || $postData[$this->handlerConfig['searchqueue']] == '')
-		{
-			//simply return an empty array as conditions if there is no queue defined or its left empty.
+		if (!$hasQueue || $postData[$this->handlerConfig['searchqueue']] == '') {
 			return [];
 		}
 
-		foreach ($this->handlerConfig['lookup']['conditions'] as $condition => $data)
-		{
-			$data['queue'] = $postData[$this->handlerConfig['searchqueue']];
+		$queueValue = $postData[$this->handlerConfig['searchqueue']];
+
+		foreach ($this->handlerConfig['lookup']['conditions'] as $condition => $data) {
+			if (isset($data['type']) && $data['type'] === 'conditionalFallback') {
+				if (!isset($data['if']['queue'])) {
+					$data['if']['queue'] = null;
+				}
+				$data['then']['queue'] = $queueValue;
+				$data['else']['queue'] = $queueValue;
+			} else {
+				$data['queue'] = $queueValue;
+			}
+
 			$conditions[$condition] = $data;
 		}
 

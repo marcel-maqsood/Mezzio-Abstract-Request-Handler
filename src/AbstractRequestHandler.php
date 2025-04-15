@@ -153,10 +153,13 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			$attributes['adminName'] = $this->adminName;
 			$attributes['userPath'] = $this->userPath;
 			$usersettings = SessionAuthMiddleware::$permissionManager::getUserSettings();
-			$attributes['userSettings'] = $usersettings;
-			$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
-			$language = $usersettings->{$settingsTable};
-			$this->setLanguage($language);
+			if($usersettings != null)
+			{
+				$attributes['userSettings'] = $usersettings;
+				$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
+				$language = $usersettings->{$settingsTable};
+				$this->setLanguage($language);
+			}
 		}
 
 		$attributes['language'] = $this->loadLanguageFile();
@@ -231,11 +234,16 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			$attributes['adminName'] = $this->adminName;
 			$attributes['userPath'] = $this->userPath;
 			$usersettings = SessionAuthMiddleware::$permissionManager::getUserSettings();
-			$attributes['userSettings'] = $usersettings;
-			$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
-			$language = $usersettings->{$settingsTable};
-			$this->setLanguage($language);
+			if($usersettings != null)
+			{
+				$attributes['userSettings'] = $usersettings;
+				$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
+				$language = $usersettings->{$settingsTable};
+				$this->setLanguage($language);
+			}
+
 		}
+		$attributes['language'] = $this->loadLanguageFile();
 		$attributes['csrf'] = $this->csrfToken;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));
 	}

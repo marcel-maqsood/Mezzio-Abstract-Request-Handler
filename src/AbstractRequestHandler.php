@@ -30,12 +30,13 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	protected $csrfToken;
 
 	public function __construct(TemplateRendererInterface $renderer, PersistentPDO $persistentPDO = null,
-								array $tableConfig = [], array $handlerConfig = [])
+								array $tableConfig = [], array $handlerConfig = [], string $language = "English")
 	{
 		$this->renderer = $renderer;
 		$this->tableConfig = $tableConfig;
 		$this->handlerConfig = $handlerConfig;
 		$this->persistentPDO = $persistentPDO;
+		$this->setLanguage($language);
 	}
 
 	protected function loadLanguageFile() : array

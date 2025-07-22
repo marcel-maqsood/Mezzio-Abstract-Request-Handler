@@ -165,10 +165,60 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
 		$attributes['language'] = $this->loadLanguageFile();
 
-		return $this->renderer->render(
-			$templateName,
-			$attributes
+		$html = $this->renderer->render($templateName, $attributes);
+
+		// ⬇️ Autocomplete-Attribute patchen
+		//$html = $this->injectRandomAutocomplete($html);
+
+		return $html;
+	}
+
+	protected function injectRandomAutocomplete(string $html): string
+	{
+		$html = preg_replace_callback(
+			'/<input\b([^>]*)>/i',
+			function ($matches) {
+				$attrs = $matches[1];
+
+				// name-Attribut finden und ersetzen (mit _rep am Ende)
+				if (preg_match('/\bname\s*=\s*("|\')(.*?)\1/i', $attrs, $nameMatch)) {
+					$originalName = $nameMatch[2];
+					$newName = 'fckedac_' . $originalName . '_rep';
+
+					$attrs = preg_replace(
+						'/\bname\s*=\s*("|\')(.*?)\1/i',
+						'name="' . $newName . '"',
+						$attrs
+					);
+				}
+
+				// id-Attribut finden und ersetzen
+				if (preg_match('/\bid\s*=\s*("|\')(.*?)\1/i', $attrs, $idMatch)) {
+					$originalId = $idMatch[2];
+					$newId = 'fckedac_' . $originalId;
+
+					$attrs = preg_replace(
+						'/\bid\s*=\s*("|\')(.*?)\1/i',
+						'id="' . $newId . '"',
+						$attrs
+					);
+				}
+
+				return '<input' . $attrs . '>';
+			},
+			$html
 		);
+
+		return $html;
+	}
+
+
+
+
+	protected function generateRandomString(int $length = 6): string
+	{
+		$chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		return substr(str_shuffle(str_repeat($chars, $length)), 0, $length);
 	}
 
 	/**
@@ -244,6 +294,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			}
 
 		}
+		$attributes["sqlLog"] = $this->persistentPDO->sqlList;
 		$attributes['language'] = $this->loadLanguageFile();
 		$attributes['csrf'] = $this->csrfToken;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));

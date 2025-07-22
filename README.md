@@ -21,6 +21,10 @@ Within our default config, we already supply these settings and you just have to
 Also, PersistentPDO must be included within your applications ```config\autoload\dependencies.global.php``` as it is required for our AbstractRequestHandler.
 We already included it within our ```config\dependencies.global.php```.
 
+##### sql log display
+When using our AbstractRequestHandler, the handler will pass the attribute "sqlLog" into each template that it renders, making it easy to view which sql statements happened within the rendering.
+
+
 
 ## Credits
 

@@ -123,13 +123,8 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
 		foreach($this->tableConfig[$tableKey] as $key => $value)
 		{
-			if(!isset($postData[$value]))
+			if(!array_key_exists($value, $postData))
 			{
-				continue;
-			}
-			if($postData[$value] == '')
-			{
-				//empty fields are getting ignored as the db will use default values or null for them.
 				continue;
 			}
 			if($value !== $this->tableConfig[$tableKey]['identifier'])

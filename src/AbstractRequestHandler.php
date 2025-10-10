@@ -28,6 +28,8 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	protected $baseTemplate;
 	protected $guard;
 	protected $csrfToken;
+	protected $translator;
+	protected $userSettings;
 
 	public function __construct(TemplateRendererInterface $renderer, PersistentPDO $persistentPDO = null,
 								array $tableConfig = [], array $handlerConfig = [], string $language = "English")
@@ -37,6 +39,19 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		$this->handlerConfig = $handlerConfig;
 		$this->persistentPDO = $persistentPDO;
 		$this->setLanguage($language);
+		$this->translator = Translator::getInstance();
+
+		$this->userSettings = SessionAuthMiddleware::$permissionManager::getUserSettings();
+		if($this->userSettings != null)
+		{
+			$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
+			$language = $this->userSettings ->{$settingsTable};
+			$this->setLanguage($language);
+		}
+
+		$languageArray = $this->loadLanguageFile();
+		$this->translator->setLanguage($languageArray);
+
 	}
 
 	protected function loadLanguageFile() : array
@@ -148,18 +163,9 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			$attributes['user'] = SessionAuthMiddleware::$permissionManager::getUser();
 			$attributes['adminName'] = $this->adminName;
 			$attributes['userPath'] = $this->userPath;
-			$usersettings = SessionAuthMiddleware::$permissionManager::getUserSettings();
-			if($usersettings != null)
-			{
-				$attributes['userSettings'] = $usersettings;
-				$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
-				$language = $usersettings->{$settingsTable};
-				$this->setLanguage($language);
-			}
 		}
 
-		$attributes['language'] = $this->loadLanguageFile();
-
+		$attributes['language'] = $this->translator::$language;
 		$html = $this->renderer->render($templateName, $attributes);
 
 		// ⬇️ Autocomplete-Attribute patchen
@@ -279,18 +285,15 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			$attributes['user'] = SessionAuthMiddleware::$permissionManager::getUser();
 			$attributes['adminName'] = $this->adminName;
 			$attributes['userPath'] = $this->userPath;
-			$usersettings = SessionAuthMiddleware::$permissionManager::getUserSettings();
-			if($usersettings != null)
+			if($this->userSettings != null)
 			{
-				$attributes['userSettings'] = $usersettings;
-				$settingsTable = $this->tableConfig[SessionAuthMiddleware::$permissionManager->getTablePrefix() . "settings"]["language"];
-				$language = $usersettings->{$settingsTable};
-				$this->setLanguage($language);
+				$attributes['userSettings'] = $this->userSettings;
 			}
 
 		}
 		$attributes["sqlLog"] = $this->persistentPDO->sqlList;
-		$attributes['language'] = $this->loadLanguageFile();
+
+		$attributes['language'] = $this->translator::$language;
 		$attributes['csrf'] = $this->csrfToken;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));
 	}

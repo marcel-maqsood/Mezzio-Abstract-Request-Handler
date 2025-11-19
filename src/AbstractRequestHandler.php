@@ -306,18 +306,32 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	 * @param ServerRequestInterface $request - Our current Request
 	 * @return array - An array containing the fetched data.
 	 */
-	protected function fetchPostData(ServerRequestInterface $request)
+	protected function fetchPostData(ServerRequestInterface $request): array
 	{
-		// If our FormHandler middleware has set some data, we can work with it.
-		// For POST requests made via AJAX transfers, the data may be within '$request->getBody()->getContents()'
-		// instead of '$request->getParsedBody()', and it is retrieved here using '$request->getAttribute('formData', [])'.
 		$postData = $request->getAttribute('formData', []);
 
-		if(empty($postData))
-		{
-			$postData = $request->getParsedBody() ?? [];
+		if (!empty($postData) && is_array($postData)) {
+			return $postData;
 		}
-		return $postData;
+
+		$parsed = $request->getParsedBody();
+		if (is_array($parsed) && !empty($parsed)) {
+			return $parsed;
+		}
+
+		$raw = (string) $request->getBody();
+
+		if ($raw === '' || $raw === null) {
+			return [];
+		}
+
+		$json = json_decode($raw, true);
+
+		if (json_last_error() === JSON_ERROR_NONE && is_array($json)) {
+			return $json;
+		}
+
+		return [];
 	}
 
 	protected function generateLookupConditions(array $postData)

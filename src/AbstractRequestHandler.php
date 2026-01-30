@@ -142,9 +142,12 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			{
 				continue;
 			}
+
+			$postVal = (string)$postData[$value];
+
 			if($value !== $this->tableConfig[$tableKey]['identifier'])
 			{
-				$insert[$value] = $postData[$value];
+				$insert[$value] = trim($postVal);
 			}
 		}
 

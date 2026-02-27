@@ -30,6 +30,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	protected $csrfToken;
 	protected $translator;
 	protected $userSettings;
+	protected $startTime;
 
 	public function __construct(TemplateRendererInterface $renderer, PersistentPDO $persistentPDO = null,
 								array $tableConfig = [], array $handlerConfig = [], string $language = "English")
@@ -51,6 +52,8 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
 		$languageArray = $this->loadLanguageFile();
 		$this->translator->setLanguage($languageArray);
+
+		$this->startTime = microtime(true);
 
 	}
 
@@ -98,6 +101,8 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	{
 		$this->adminName = $request->getAttribute('adminName', null);
 		$this->userPath = $request->getAttribute('userPath', null);
+
+
 
 
 		if ($request->getMethod() === 'POST') {
@@ -169,6 +174,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		}
 
 		$attributes['language'] = $this->translator::$language;
+		$attributes['request_time'] = microtime(true) - $this->startTime;
 		$html = $this->renderer->render($templateName, $attributes);
 
 		// ⬇️ Autocomplete-Attribute patchen
@@ -253,6 +259,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		{
 			$responseData['messages'] = $errors;
 		}
+		$attributes['request_time'] = microtime(true) - $this->startTime;
 		return new JsonResponse($responseData, $status);
 	}
 
@@ -274,6 +281,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			}
 		}
 
+		$attributes['request_time'] = microtime(true) - $this->startTime;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));
 	}
 
@@ -283,6 +291,7 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	protected function generateResponseWithAttr(string $templateName, array $attributes = [])
 	{
 		$attributes['adminName'] = $this->adminName;
+
 		if($this->adminName != null)
 		{
 			$attributes['user'] = SessionAuthMiddleware::$permissionManager::getUser();
@@ -298,6 +307,8 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
 		$attributes['language'] = $this->translator::$language;
 		$attributes['csrf'] = $this->csrfToken;
+
+		$attributes['request_time'] = microtime(true) - $this->startTime;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));
 	}
 

@@ -102,19 +102,12 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		$this->adminName = $request->getAttribute('adminName', null);
 		$this->userPath = $request->getAttribute('userPath', null);
 
-
-
+		if (class_exists('Mezzio\Csrf\CsrfMiddleware')) {
+			$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
+		}
 
 		if ($request->getMethod() === 'POST') {
 			return $this->handlePost($request, $templateName);
-		}
-		else
-		{
-			if (class_exists('Mezzio\Csrf\CsrfMiddleware'))
-			{
-				$this->guard = $request->getAttribute(CsrfMiddleware::GUARD_ATTRIBUTE);
-				$this->csrfToken = $this->guard == null ? null : $this->guard->generateToken();
-			}
 		}
 
 		return $this->defaultResponse($request);
@@ -253,6 +246,11 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 
 		if ($status == 200)
 		{
+			if( $this->guard !== null)
+			{
+				$attributes['csrf'] = $this->guard->generateToken();
+			}
+
 			$responseData['html'] = $this->renderHtml($templateName, $attributes);
 		}
 		else
@@ -281,6 +279,12 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 			}
 		}
 
+		if ($this->guard !== null) {
+			$this->csrfToken = $this->guard->generateToken();
+		}
+
+		$attributes['csrf'] = $this->csrfToken;
+
 		$attributes['request_time'] = microtime(true) - $this->startTime;
 		return new HtmlResponse($this->renderHtml($templateName, $attributes));
 	}
@@ -306,6 +310,11 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 		$attributes["sqlLog"] = $this->persistentPDO->sqlList;
 
 		$attributes['language'] = $this->translator::$language;
+
+		if ($this->guard !== null) {
+			$this->csrfToken = $this->guard->generateToken();
+		}
+
 		$attributes['csrf'] = $this->csrfToken;
 
 		$attributes['request_time'] = microtime(true) - $this->startTime;
@@ -380,16 +389,17 @@ abstract class AbstractRequestHandler implements RequestHandlerInterface
 	{
 		$postData = $this->fetchPostData($request);
 
+		if ($request->getAttribute('csrfError') !== null) {
+			$this->errorMsgs[] = $request->getAttribute('csrfError');
+
+			return $this->defaultResponse($request, $postData);
+		}
+
+
 		if(!isset($postData['config']))
 		{
 			return $this->defaultResponse($request, $postData);
 		}
-
-		/*if ($request->getHeaderLine('X-Requested-With') !== 'XMLHttpRequest')
-		{
-			//If the POST is not done by AJAX, we serve a default response.
-			return $this->defaultResponse($request, $postData);
-		}*/
 
 		switch ($postData['config'])
 		{
